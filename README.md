@@ -11,18 +11,26 @@ This repository contains the code used for the MLGWSC-1 mock data challenge [1] 
 * `whiten.py`: Whitens an HDF5 file of test data. Useful in cases where the same data is analyzed multiple times (e.g. CNN architecture optimization) without chaning the whitening parameters, `apply.py` accepts whitened data (the `--white` argument must be supplied).
 
 Minimal usage to reproduce trained network:
-    python split_noise_file.py <MDC_REPO_PATH>/real_noise_file.hdf rnoise1.hdf rnoise2.hdf
-    python slice_real_noise.py rnoise1.hdf -o <TRAINING_DATA_PATH> -d 2 --chunk-size 24000
-    tr_paths=""
-    for i in {0000..0049}
-    do
-      new_path=<TRAINING_DATA_PATH>/training_data_"$i".hdf 
-      tr_paths=$tr_paths" "$new_path
-      python gen.py -o $new_path -a IMRPhenomXPHM -d 2 --training-samples 10000 10000 --validation-samples 2000 2000 --real-noise-file <TRAINING_DATA_PATH>/sliced_noise_"$i".hdf
-    done
-    python train.py -d $tr_paths -o <OUTPUT> -s 7. 20. --train-device <TRAIN_DEVICE> --store-device <STORE_DEVICE> --epochs 250 --learning-rate 4.e-6
+``` bash
+python split_noise_file.py <MDC_REPO_PATH>/real_noise_file.hdf rnoise1.hdf rnoise2.hdf
+python slice_real_noise.py rnoise1.hdf -o <TRAINING_DATA_PATH> -d 2 --chunk-size 24000
+tr_paths=""
+for i in {0000..0049}
+do
+    new_path=<TRAINING_DATA_PATH>/training_data_"$i".hdf 
+    tr_paths=$tr_paths" "$new_path
+    python gen.py -o $new_path -a IMRPhenomXPHM -d 2 --training-samples 10000 10000 --validation-samples 2000 2000 \
+                  --real-noise-file <TRAINING_DATA_PATH>/sliced_noise_"$i".hdf
+done
+python train.py -d $tr_paths -o <OUTPUT> -s 7. 20. --train-device <TRAIN_DEVICE> --store-device <STORE_DEVICE> \
+                --epochs 250 --learning-rate 4.e-6
+```
 The training and validation data is split into 50 files due to more practical handling of smaller files and filesize limitations of some file systems. Also, an overall shorter runtime can be achieved by running multiple of the `gen.py` processes in parallel. One should substitute paths to directories (ideally empty) for `<TRAINING_DATA>` and `<OUTPUT>` and either `cuda` or `cpu` for `<TRAIN_DEVICE>` and `<STORE_DEVICE>`; if a CUDA-compatible GPU is installed and available to PyTorch, `cuda` can be used for the training device. For the data storage device, `cpu` is the safer option, but if the GPU has enough VRAM, `cuda` can also be used for a small performance boost.
 
 After training, the `<OUTPUT>` directory contains the network states (stored as 'state dictionaries') after each training epoch, as well as `best_state_dict.pt` after the epoch with the lowest validation loss, and `losses.txt` with the training and validation loss values throughout the training. Experiments during development suggest that the best performance on test dataset 4 is achieved by choosing one of the local minima of the validation loss which occur earlier during the training than the global minimum. The chosen network is applied to test data to produce events by running:
-    python apply.py <TEST_INPUT_PATH> <EVENT_OUTPUT_PATH> -w <STATE_DICTIONARY> --device <DEVICE>
+``` bash    
+python apply.py <TEST_INPUT_PATH> <EVENT_OUTPUT_PATH> -w <STATE_DICTIONARY> --device <DEVICE>
+```
 For `<DEVICE>`, one should again use `cuda`, if available. For computational efficiency, it is also beneficial to specify `--num-workers` with the number of physical cores.
+
+[1] M. Schäfer, O. Zelenka, P. Müller, and A. Nitz, [gwastro/ml-mock-data-challenge-1: MLGWSC-1 Release v1.2](https://github.com/gwastro/ml-mock-data-challenge-1) (2021).
