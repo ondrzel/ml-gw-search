@@ -1,7 +1,10 @@
 # ml-gw-search
 
-This repository contains the code used for the MLGWSC-1 mock data challenge [1] in the submission titled TPI FSU Jena, authored by Ondřej Zelenka, Bernd Brügmann, and Frank Ohme.
+This repository contains the code used for the MLGWSC-1 mock data challenge [1](#references) in the submission titled TPI FSU Jena and followup projects, authored by Ondřej Zelenka, Bernd Brügmann, and Frank Ohme.
 
+### MLGWSC-1 submission
+
+The submission is in the directory `mlgwsc-1`, and contains
 * `split_noise_file.py`: Randomly splits an HDF5 file containing noise (originally meant to be used with `real_noise_file.hdf` supplied by the MDC) into two, preserving the individual datasets. Not strictly required but useful for generation of training and validation data with real noise.
 * `slice_real_noise.py`: Whitens and slices an HDF5 file containing noise (meant for the first output file of the previous script, also can be used with `real_noise_file.hdf`). Necessary for generation of training and validation data with real noise.
 * `gen.py`: Generates training and validation data. Can use Gaussian noise (generated at runtime) or real noise provided through the output of the previous script. Can use spinless `IMRPhenomD` or generic-spin `IMRPhenomXPHM` to generate injections.
@@ -10,7 +13,7 @@ This repository contains the code used for the MLGWSC-1 mock data challenge [1] 
 * `best_state_dict.pt`: State dictionary with the trained weights submitted to the mock data challenge.
 * `whiten.py`: Whitens an HDF5 file of test data. Useful in cases where the same data is analyzed multiple times (e.g. CNN architecture optimization) without chaning the whitening parameters, `apply.py` accepts whitened data (the `--white` argument must be supplied).
 
-Minimal usage to reproduce trained network:
+Minimal usage to reproduce the network training:
 ``` bash
 python split_noise_file.py <MDC_REPO_PATH>/real_noise_file.hdf rnoise1.hdf rnoise2.hdf
 python slice_real_noise.py rnoise1.hdf -o <TRAINING_DATA_PATH> -d 2 --chunk-size 24000
@@ -33,4 +36,31 @@ python apply.py <TEST_INPUT_PATH> <EVENT_OUTPUT_PATH> -w <STATE_DICTIONARY> --de
 ```
 For `<DEVICE>`, one should again use `cuda`, if available. For computational efficiency, it is also beneficial to specify `--num-workers` with the number of physical cores.
 
+### Evaluation time decomposition
+
+The directory `mlgwsc-1/timed` contains a modified version of the submission to study evaluation times of different parts of the network, and example histograms.
+* `apply_timed.py`: Performs the same task as the `apply.py` of the submission. In addition, if a filename is supplied through the `--times-output` argument, the script computes and saves the evaluation times of the convolutional part, the flattening layer, and the fully connected part of the network over the individual batches, as a text file. These are saved in the first three columns of the output file, respectively, and the fourth column contains the sizes of the respective batches.
+* `day_ds<dataset number>`, `month_ds<dataset number>`: Example time outputs of the modified submission applied to the 4 test datasets of lengths one day and one month, respectively. They have been evaluated on the machine used to develop the submission, using a GeForce RTX 3090 GPU. The files are named `times_for.txt` and `times_bac.txt` for the foreground and background evaluation, respectively.
+* `hist_day.pdf`, `hist_month.pdf` are histograms of the evaluation times above.
+
+### Correction
+
+The directory `correction` contains the code and results of the corrected search based on the MLGWSC-1 submission presented in [2](#references). This includes:
+* `apply.py`: The updated search algorithm, the only difference from `mlgwsc-1/apply.py` is the removal of the batch normalization layer.
+* `train.py`: The updated training script, the only difference from `mlgwsc-1/train.py` is that it only loads half the waveforms in each supplied training data file. The noise samples meant for injection of the unloaded waveforms are used as pure noise.
+* `state_dicts`: Dictionary containing trained network state dictionaries. Selected from 6 training runs as the most sensitive of each run on dataset 4 at 1 false alarm per month. Files are named `R<run number>_<four-digit epoch number>.pt`.
+
+### Application to O3b data
+
+The directory `correction/O3b` contains the results of the application of the networks contained in `state_dicts` to O3b data.
+* `downsample.py`: Script used to download O3b data in segments where data is available in sufficient quality in both LIGO detectors. To reproduce the data analyzed in [2](#references), run as
+``` bash
+python downsample.py --output <output filename> --minimum-duration 60
+```
+* `events`: Events returned by the 6 applied searches at first-level trigger threshold 0. Files are named `R<run number>_<four-digit epoch number>.hdf`.
+* `specgrams`: Q-transform spectrograms of the loudest 128 events returned by the 6 searches. Contains 6 directories with the same naming convention as the event files. Spectrograms are sorted in descending loudness, i.e. `specgram_plot_0000.pdf` is the loudest event returned by the given search.
+
+# References
+
 [1] M. Schäfer, O. Zelenka, P. Müller, and A. Nitz, [gwastro/ml-mock-data-challenge-1: MLGWSC-1 Release v1.2](https://github.com/gwastro/ml-mock-data-challenge-1) (2021).
+[2] O. Zelenka. "Applications of Machine Learning to Gravitational Waves". PhD thesis. Friedrich-Schiller-Universität Jena, 2023.
