@@ -48,7 +48,7 @@ The directory `mlgwsc-1/timed` contains a modified version of the submission to 
 The directory `correction` contains the code and results of the corrected search based on the MLGWSC-1 submission presented in [2](#references). This includes:
 * `apply.py`: The updated search algorithm, the only difference from `mlgwsc-1/apply.py` is the removal of the batch normalization layer.
 * `train.py`: The updated training script, the only difference from `mlgwsc-1/train.py` is that it only loads half the waveforms in each supplied training data file. The noise samples meant for injection of the unloaded waveforms are used as pure noise.
-* `state_dicts`: Dictionary containing trained network state dictionaries. Selected from 6 training runs as the most sensitive of each run on dataset 4 at 1 false alarm per month. Files are named `R<run number>_<four-digit epoch number>.pt`.
+* `state_dicts`: Directory containing trained network state dictionaries. Selected from 6 training runs as the most sensitive of each run on dataset 4 at 1 false alarm per month. Files are named `R<run number>_<four-digit epoch number>.pt`.
 
 ### Application to O3b data
 
@@ -60,7 +60,15 @@ python downsample.py --output <output filename> --minimum-duration 60
 * `events`: Events returned by the 6 applied searches at first-level trigger threshold 0. Files are named `R<run number>_<four-digit epoch number>.hdf`.
 * `specgrams`: Q-transform spectrograms of the loudest 128 events returned by the 6 searches. Contains 6 directories with the same naming convention as the event files. Spectrograms are sorted in descending loudness, i.e. `specgram_plot_0000.pdf` is the loudest event returned by the given search.
 
+### Extended mass range experiment
+
+The directory `extended_mass` contains additional data regarding the experiment of App. A in [2](#references). This includes:
+* `gen.py`: Modified training data generation script, differing from that of the [MLGWSC-1 submission](#mlgwsc-1-submission) merely by using the mass range $\left[7M_\odot,\, 50M_\odot\right]$ instead of $\left[10M_\odot,\, 50M_\odot\right]$.
+* `state_dicts`: Directory containing trained network state dictionaries. The experiments were trained and states were selected the same way as in the [corrected experiment](#correction), except for the regenerated dataset, and are named `E<run number>_<four-digit epoch number>.pt`.
+* `O3b/events`: Events from the O3b observing run returned by the 6 searches at first-level trigger threshold 0. Files are named `E<run number>_<four-digit epoch number>.pt`.
+
 # References
 
 [1] M. Schäfer, O. Zelenka, P. Müller, and A. Nitz, [gwastro/ml-mock-data-challenge-1: MLGWSC-1 Release v1.2](https://github.com/gwastro/ml-mock-data-challenge-1) (2021).
+
 [2] O. Zelenka. "Applications of Machine Learning to Gravitational Waves". PhD thesis. Friedrich-Schiller-Universität Jena, 2023.
