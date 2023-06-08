@@ -41,7 +41,8 @@ For `<DEVICE>`, one should again use `cuda`, if available. For computational eff
 The directory `mlgwsc-1/timed` contains a modified version of the submission to study evaluation times of different parts of the network, and example histograms.
 * `apply_timed.py`: Performs the same task as the `apply.py` of the submission. In addition, if a filename is supplied through the `--times-output` argument, the script computes and saves the evaluation times of the convolutional part, the flattening layer, and the fully connected part of the network over the individual batches, as a text file. These are saved in the first three columns of the output file, respectively, and the fourth column contains the sizes of the respective batches.
 * `day_ds<dataset number>`, `month_ds<dataset number>`: Example time outputs of the modified submission applied to the 4 test datasets of lengths one day and one month, respectively. They have been evaluated on the machine used to develop the submission, using a GeForce RTX 3090 GPU. The files are named `times_for.txt` and `times_bac.txt` for the foreground and background evaluation, respectively.
-* `hist_day.pdf`, `hist_month.pdf` are histograms of the evaluation times above.
+* `hist_day.pdf`, `hist_month.pdf`: Example histograms of the evaluation times above.
+* `plot_hist.py`: Script to plot histograms of the times in the `apply_timed.py` output.
 
 ### Correction
 
@@ -63,7 +64,7 @@ python downsample.py --output <output filename> --minimum-duration 60
 ### Extended mass range experiment
 
 The directory `extended_mass` contains additional data regarding the experiment of App. A in [2](#references). This includes:
-* `gen.py`: Modified training data generation script, differing from that of the [MLGWSC-1 submission](#mlgwsc-1-submission) merely by using the mass range $\left[7M_\odot,\, 50M_\odot\right]$ instead of $\left[10M_\odot,\, 50M_\odot\right]$.
+* `gen.py`: Modified training data generation script, differing from that of the [MLGWSC-1 submission](#mlgwsc-1-submission) merely by using the mass range $\left[7M_\odot, 50M_\odot\right]$ instead of $\left[10M_\odot, 50M_\odot\right]$.
 * `state_dicts`: Directory containing trained network state dictionaries. The experiments were trained and states were selected the same way as in the [corrected experiment](#correction), except for the regenerated dataset, and are named `E<run number>_<four-digit epoch number>.pt`.
 * `O3b/events`: Events from the O3b observing run returned by the 6 searches at first-level trigger threshold 0. Files are named `E<run number>_<four-digit epoch number>.pt`.
 
