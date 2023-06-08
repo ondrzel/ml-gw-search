@@ -64,7 +64,7 @@ python downsample.py --output <output filename> --minimum-duration 60
 ### Extended mass range experiment
 
 The directory `extended_mass` contains additional data regarding the experiment of App. A in [2](#references). This includes:
-* `gen.py`: Modified training data generation script, differing from that of the [MLGWSC-1 submission](#mlgwsc-1-submission) merely by using the mass range $\left[7M_\odot, 50M_\odot\right]$ instead of $\left[10M_\odot, 50M_\odot\right]$.
+* `gen.py`: Modified training data generation script, differing from that of the [MLGWSC-1 submission](#mlgwsc-1-submission) merely by using the mass range $\left[7M_\odot,~ 50M_\odot\right]$ instead of $\left[10M_\odot,~ 50M_\odot\right]$.
 * `state_dicts`: Directory containing trained network state dictionaries. The experiments were trained and states were selected the same way as in the [corrected experiment](#correction), except for the regenerated dataset, and are named `E<run number>_<four-digit epoch number>.pt`.
 * `O3b/events`: Events from the O3b observing run returned by the 6 searches at first-level trigger threshold 0. Files are named `E<run number>_<four-digit epoch number>.pt`.
 
